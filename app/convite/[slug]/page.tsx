@@ -24,9 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${convite.title} — Convite Especial`;
   const description =
     convite.message || `Convite especial para ${convite.guestName}`;
-  const imageUrl = convite.photoUrl?.startsWith("http")
-    ? convite.photoUrl
-    : `${siteUrl}/og-image.png`;
+    const imageUrl = `${siteUrl}/og-image.png`;
 
   return {
     metadataBase: new URL(siteUrl),
