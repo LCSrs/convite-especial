@@ -17,10 +17,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: "Convite Especial" };
   }
 
-  return {
-    title: `${convite.title} — Convite Especial`,
-    description: `Convite especial para ${convite.guestName}`,
-  };
+  const title = `${convite.title} — Convite Especial`;
+const description = convite.message || `Convite especial para ${convite.guestName}`;
+const imageUrl = convite.photoUrl || "/og-image.png";
+
+return {
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    images: [
+      {
+        url: imageUrl,
+        width: 1200,
+        height: 630,
+        alt: title,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [imageUrl],
+  },
+};
 }
 
 export default async function ConvitePage({ params }: PageProps) {
