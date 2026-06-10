@@ -19,31 +19,36 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${convite.title} — Convite Especial`;
 const description = convite.message || `Convite especial para ${convite.guestName}`;
-const imageUrl = convite.photoUrl || "/og-image.png";
+const siteUrl = "https://convite-especial-lcs.vercel.app";
+const imageUrl = convite.photoUrl?.startsWith("http")
+  ? convite.photoUrl
+  : `${siteUrl}/og-image.png`;
 
-return {
-  title,
-  description,
-  openGraph: {
+  return {
+    metadataBase: new URL(siteUrl),
     title,
     description,
-    images: [
-      {
-        url: imageUrl,
-        width: 1200,
-        height: 630,
-        alt: title,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-    images: [imageUrl],
-  },
-};
-}
+    openGraph: {
+      title,
+      description,
+      url: `${siteUrl}/convite/${slug}`,
+      siteName: "Convite Especial",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
 
 export default async function ConvitePage({ params }: PageProps) {
   const { slug } = await params;
