@@ -12,17 +12,21 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const convite = await getConviteBySlugServer(slug);
+  const siteUrl = "https://convite-especial-lcs.vercel.app";
 
   if (!convite) {
-    return { title: "Convite Especial" };
+    return {
+      metadataBase: new URL(siteUrl),
+      title: "Convite Especial",
+    };
   }
 
   const title = `${convite.title} — Convite Especial`;
-const description = convite.message || `Convite especial para ${convite.guestName}`;
-const siteUrl = "https://convite-especial-lcs.vercel.app";
-const imageUrl = convite.photoUrl?.startsWith("http")
-  ? convite.photoUrl
-  : `${siteUrl}/og-image.png`;
+  const description =
+    convite.message || `Convite especial para ${convite.guestName}`;
+  const imageUrl = convite.photoUrl?.startsWith("http")
+    ? convite.photoUrl
+    : `${siteUrl}/og-image.png`;
 
   return {
     metadataBase: new URL(siteUrl),
@@ -49,6 +53,7 @@ const imageUrl = convite.photoUrl?.startsWith("http")
       images: [imageUrl],
     },
   };
+}
 
 export default async function ConvitePage({ params }: PageProps) {
   const { slug } = await params;
