@@ -6,7 +6,7 @@ export type ConviteFormData = {
   time: string;
   location: string;
   mapsLink: string;
-  customSlug: string;
+  customSlug?: string;
 };
 
 export type ConvitePreviewData = ConviteFormData & {
