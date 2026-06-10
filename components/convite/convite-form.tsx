@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Send } from "lucide-react";
+import { Copy, Eye, ExternalLink, MessageCircle, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,6 +21,7 @@ const defaultValues: ConviteFormData = {
   time: "",
   location: "",
   mapsLink: "",
+  customSlug: "",
 };
 
 export function ConviteForm() {
@@ -31,6 +32,7 @@ export function ConviteForm() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
+  const [publishedLink, setPublishedLink] = useState<string | null>(null);
 
   const {
     register,
@@ -64,8 +66,11 @@ export function ConviteForm() {
 
     try {
       const convite = await publishConvite({ ...data, photoUrl });
-      setPublishSuccess("Convite publicado com sucesso! Redirecionando...");
-      router.push(`/convite/${convite.slug}?publicado=1`);
+const link = `${window.location.origin}/convite/${convite.slug}`;
+
+setPublishedLink(link);
+setPublishSuccess("Convite publicado com sucesso!");
+setIsPublishing(false);
     } catch (error) {
       const message =
         error instanceof Error && error.message
@@ -94,6 +99,26 @@ export function ConviteForm() {
             })}
           />
         </FormField>
+        <FormField
+  label="Link personalizado"
+  htmlFor="customSlug"
+  error={errors.customSlug?.message}
+>
+  <Input
+    id="customSlug"
+    placeholder="Ex: jantar-com-a-ana"
+    error={!!errors.customSlug}
+    {...register("customSlug", {
+      pattern: {
+        value: /^[a-z0-9-]*$/,
+        message: "Use apenas letras minúsculas, números e hífens",
+      },
+    })}
+  />
+  <p className="mt-2 text-xs text-stone-500">
+    Opcional. Exemplo: convite-especial-lcs.vercel.app/convite/jantar-com-a-ana
+  </p>
+</FormField>
 
         <FormField
           label="Título do convite"
@@ -208,14 +233,55 @@ export function ConviteForm() {
           </Button>
         </div>
 
-        {publishSuccess && (
-          <p
-            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-700"
-            role="status"
-          >
-            {publishSuccess}
-          </p>
-        )}
+        {publishSuccess && publishedLink && (
+  <div
+    className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center"
+    role="status"
+  >
+    <p className="text-sm font-medium text-emerald-700">
+      {publishSuccess}
+    </p>
+
+    <div className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs text-stone-600 break-all">
+      {publishedLink}
+    </div>
+
+    <div className="grid gap-2 sm:grid-cols-3">
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={() => navigator.clipboard.writeText(publishedLink)}
+      >
+        <Copy className="h-4 w-4" />
+        Copiar
+      </Button>
+
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={() => window.open(publishedLink, "_blank")}
+      >
+        <ExternalLink className="h-4 w-4" />
+        Abrir
+      </Button>
+
+      <Button
+        type="button"
+        onClick={() =>
+          window.open(
+            `https://wa.me/?text=${encodeURIComponent(
+              `Você recebeu um convite especial: ${publishedLink}`
+            )}`,
+            "_blank"
+          )
+        }
+      >
+        <MessageCircle className="h-4 w-4" />
+        WhatsApp
+      </Button>
+    </div>
+  </div>
+)}
 
         {publishError && (
           <p

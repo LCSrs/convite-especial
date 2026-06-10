@@ -6,8 +6,21 @@ import type { Database, Invite, InviteInsert } from "@/lib/supabase/types";
 
 export type { Database, Invite, InviteInsert } from "@/lib/supabase/types";
 
-function generateUniqueSlug(): string {
-  return crypto.randomUUID();
+function normalizeSlug(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function generateUniqueSlug(title: string, customSlug?: string): string {
+  const baseSlug = normalizeSlug(customSlug || title || "convite");
+  const suffix = Math.floor(1000 + Math.random() * 9000);
+
+  return `${baseSlug || "convite"}-${suffix}`;
 }
 
 function logCreateInviteError(error: PostgrestError) {
@@ -33,7 +46,7 @@ export async function createInvite(input: CreateConviteInput): Promise<string> {
     throw new Error("Você precisa estar logado para criar um convite.");
   }
 
-  const slug = generateUniqueSlug();
+  const slug = generateUniqueSlug(input.title, input.customSlug);
   const photoUrl = await preparePhotoForStorage(input.photoUrl);
 
   const payload: InviteInsert = {
